@@ -50,8 +50,8 @@ let drop n lst =
     | rest -> rest
   in aux 0 lst
 
-(** unimodal not implemented. *)
-(** powerset not implemented. *)
+(** [unimodal] not yet implemented. *)
+(** [powerset] not yet implemented. *)
 
 let rec print_int_list = function
 | [] -> ()
@@ -112,3 +112,86 @@ let rec earliest lst =
     match earliest xs with
     None -> Some(x)
     | Some(y) -> if is_before y x then Some(y) else Some(x)
+
+let insert k v d = (k, v)::d
+let rec lookup k = function
+[] -> None
+| (k', v)::t -> if k = k' then Some(v) else lookup k t
+
+let assoc_list = insert 1 "one" []
+let assoc_list = insert 2 "two" assoc_list
+let assoc_list = insert 3 "three" assoc_list
+let position_2 = lookup 2 assoc_list
+let position_4 = lookup 4 assoc_list
+
+type suit = Spade | Heart | Diamond | Club
+type rank = int
+type card = { suit: suit; rank: rank }
+
+let club_ace = { suit = Club; rank = 1 }
+let heart_queen = { suit = Heart; rank = 12 }
+let diamond_two = { suit = Diamond; rank = 2 }
+let spade_seven = { suit = Spade; rank = 7 }
+
+let sign (x: int) = if x > 0 then `Pos
+else if x < 0 then `Neg
+else `Zero
+
+let quadrant = fun (x, y) ->
+  match (sign x, sign y) with
+  (`Pos, `Pos) -> Some(`I)
+  | (`Neg, `Pos) -> Some(`II)
+  | (`Neg, `Neg) -> Some(`III)
+  | (`Pos, `Neg) -> Some(`IV)
+  | _ -> None
+
+let quadrant_when = function
+  (x', y') when x' > 0 && y' > 0 -> Some(`I)
+  | (x', y') when x' < 0 && y' > 0 -> Some(`II)
+  | (x', y') when x' < 0 && y' < 0 -> Some(`III)
+  | (x', y') when x' > 0 && y' < 0 -> Some(`IV)
+  | _ -> None
+
+type 'a tree =
+  | Leaf
+  | Node of 'a * 'a tree * 'a tree
+
+let t = Node(4,
+  Node(2,
+    Node(1, Leaf, Leaf),
+    Node(3, Leaf, Leaf)
+    ),
+  Node(5,
+    Node(6, Leaf, Leaf),
+    Node(7, Leaf, Leaf)
+    )
+  )
+
+let rec size = function
+  | Leaf -> 0
+  | Node (_, l, r) -> 1 + size l + size r
+
+let depth tree =
+  match tree with
+  Leaf -> 0
+  | Node (_, l, r) -> max (size l) (size r)
+
+let shape tree_a tree_b =
+  match (tree_a, tree_b) with
+  (Leaf, Leaf) -> true
+  | (Node(_, l, r), Node(_, l', r')) -> ((depth l = depth l') && (size l = size l')) && ((depth r = depth r') && (size r = size r'))
+  | _ -> false
+
+let rec max_number_in_list = function
+  [] -> 0
+  | x::xs -> max x (max_number_in_list xs)
+
+let rec list_max = function
+  [] -> failwith "list_max"
+  | lst -> max_number_in_list lst
+
+let rec list_max_string = function
+  [] -> print_endline "empty"
+  | lst -> print_endline @@ string_of_int @@ max_number_in_list lst
+
+(** [is_bst] not yet implemented. *)
